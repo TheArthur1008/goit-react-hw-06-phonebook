@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContactAction } from 'redux/slice/contactsSlice';
+import { contactsSelector } from 'redux/selectors/index';
 import PropTypes from 'prop-types';
 import { nanoid } from 'nanoid';
+
 import styles from './ContactForm.module.css';
 
-export const ContactForm = ({ hendleAddContact }) => {
+export const ContactForm = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const { contacts } = useSelector(contactsSelector);
+  const dispatch = useDispatch();
 
   const hendleChange = event => {
     switch (event.currentTarget.name) {
@@ -23,11 +29,15 @@ export const ContactForm = ({ hendleAddContact }) => {
   const hendleSubmitForm = event => {
     event.preventDefault();
     const newContact = { id: nanoid(), name, number };
-    hendleAddContact(newContact);
-    hendelReset();
-  };
+    if (contacts.some(({ name }) => name === newContact.name)) {
+      alert(`${newContact.name} is already in contacts!`);
+      return formReset();
+    }
 
-  const hendelReset = () => {
+    dispatch(addContactAction(newContact));
+    formReset();
+  };
+  const formReset = () => {
     setName('');
     setNumber('');
   };
